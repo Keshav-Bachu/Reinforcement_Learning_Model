@@ -15,8 +15,5 @@ gameObservations = np.load('/Users/keshavbachu/Documents/User Space/DASLAB Assig
 
 
 #using a list of 3 x3 arrays otherwise there is a problem with how numpy stores 4d arrays of different turn sizes
-gameResultsFormatted = []
-gameObservationsFormatted = []
-for change in range(0, gameObservations.shape[0]):
-    gameResultsFormatted.append(gameResults[change])
-    gameObservationsFormatted.append(gameObservations[change])
+gameResults = gameResults[()]
+gameObservations = gameObservations[()]
