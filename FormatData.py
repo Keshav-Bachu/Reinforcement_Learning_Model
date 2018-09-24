@@ -43,7 +43,16 @@ def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     
     return specificGame[topSide:bottomSide + 1 ,leftSide:rightSide + 1]
 
-def addPadding(observationSpace, objectpad, observationSpace):
+def addPadding(observation, objectpad, observationSpace):
+    
+    #horz padding
+    if(observation.shape[1] != observationSpace):
+        horzPadding = np.zeros((observation.shape[0], 1)) + objectpad
+        
+        
+    if(observation.shape[0] != observationSpace):
+        
+        
     
     
 #load in the X and Y data
