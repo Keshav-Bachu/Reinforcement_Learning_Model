@@ -43,14 +43,44 @@ def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     
     return specificGame[topSide:bottomSide + 1 ,leftSide:rightSide + 1]
 
-def addPadding(observation, objectpad, observationSpace):
+def addPadding(observation, objectpad, observationSpace, objectLook):
     
     #horz padding
     if(observation.shape[1] != observationSpace):
         horzPadding = np.zeros((observation.shape[0], 1)) + objectpad
         
+        #check if the values need to be added to the left or right
+        addLeft = False
+        for i in range(observation.shape[0]):
+            for j in range(observationSpace):
+                if(observation[i][j] == objectLook):
+                    addLeft = True
+            
+        while(observation.shape[1] < 2 * observationSpace + 1):
+            if(addLeft):
+                observation = np.append(horzPadding, observation ,axis = 1)
+            else:
+                observation = np.append(observation, horzPadding ,axis = 1)
+        
         
     if(observation.shape[0] != observationSpace):
+        vertPadding = np.zeros((1, observation.shape[1])) + objectpad
+        
+        addTop = False
+        for i in range(observation.shape[1]):
+            for j in range(observationSpace):
+                if(observation[j][i] == objectLook):
+                    addTop = True
+                    break
+                    
+        while(observation.shape[0] < 2 * observationSpace + 1):
+            if(addTop):
+                observation = np.append(vertPadding, observation, axis = 0)
+            else:
+                observation = np.append(observation, vertPadding ,axis = 0)
+            
+            
+    return observation
         
         
     
@@ -75,8 +105,12 @@ locY = -1;
 observationSpace = None
 firstTurn = True
 
+turns = []
+games = []
+
 #observe off of one 
 for game in gameObservations:
+    turns = []
     #find the initial location of a piece to observe
     for turn in game:
         if firstTurn:
@@ -86,4 +120,10 @@ for game in gameObservations:
             locX, locY = nextLocation(turn, 4, locX, locY)
             
         observationSpace = getObservations(turn, 2, locX, locY)
-        print(observationSpace, '\n')
+        observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
+        #print(observationSpace, '\n')
+        turns.append(observationSpace)
+    turns = np.asanyarray(turns)
+    games.append(turns)
+games = np.asanyarray(games)
+        
