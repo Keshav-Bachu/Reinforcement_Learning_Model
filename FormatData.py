@@ -126,4 +126,14 @@ for game in gameObservations:
     turns = np.asanyarray(turns)
     games.append(turns)
 games = np.asanyarray(games)
+singleReward = np.zeros(gameResults.shape)
+
+for gameresult in range (0, gameResults.shape[0]):
+    lastScore = 0
+    for value in range(0, gameResults.shape[1]):
+        #print(gameresult, " ", value)
+        if(gameResults[gameresult][value] != lastScore):
+            singleReward[gameresult][value] = gameResults[gameresult][value] - lastScore
+            lastScore = gameResults[gameresult][value]
+            
         
