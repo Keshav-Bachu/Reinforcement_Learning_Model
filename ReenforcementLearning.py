@@ -88,19 +88,24 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     #reward is [? 26]
     #discount factor = some discrete value
     #predictedValue
-    """
-    actionTaken = tf.argmax(actionSoftmax, 1)
-    discountFactor = 1
-    actionTaken = tf.reshape(actionTaken, [-1,1])
-    cost = rewardSet + tf.cast(discountFactor * actionTaken, tf.float32) - tf.cast(actionSet, tf.float32)
-    cost = tf.reduce_mean(cost)
-    return cost
-    """
     
+    
+    actionSoftmax = tf.argmax(actionSoftmax, 1)
+    discountFactor = 1
+    actionSoftmax = tf.reshape(actionSoftmax, [-1,1])
+    #cross_entropy = rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32)
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32), reduction_indices=[1]))
+    cost = tf.reduce_mean(cross_entropy)
+    return cost
+    
+    
+    
+    """
     #simple test cost    
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits = actionSoftmax,labels=actionSet)
     cost = tf.reduce_mean(cross_entropy)
     return cost
+    """
     
     
 def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500):
