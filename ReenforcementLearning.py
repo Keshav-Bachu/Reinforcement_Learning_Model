@@ -34,9 +34,9 @@ def generatePlaceholders(trainX, trainReward, trainAction):
     
     actionDim1 = trainAction.shape[1]
     
-    Xtrain = tf.placeholder(shape = [None, dim1X, dim2X, dim3X], dtype=tf.float32)
-    rewardTrain = tf.placeholder(shape = [None, rewardDim1], dtype=tf.float32)
-    actionTrain = tf.placeholder(shape = [None, actionDim1], dtype=tf.float32)
+    Xtrain = tf.placeholder(shape = [None, dim1X, dim2X, dim3X], dtype=tf.float32, name = 'Xtrain')
+    rewardTrain = tf.placeholder(shape = [None, rewardDim1], dtype=tf.float32, name = 'rewardTrain')
+    actionTrain = tf.placeholder(shape = [None, actionDim1], dtype=tf.float32, name = 'actionTrain')
     
     return Xtrain, rewardTrain, actionTrain
     
@@ -58,6 +58,8 @@ def flatten(layer):
     layer_shape = layer.get_shape()
     num_features = layer_shape[1:4].num_elements()
     layer = tf.reshape(layer, [-1, num_features])
+    
+    return layer
  
 
 def fc_layer(input,num_inputs,num_outputs, use_relu = False):
@@ -72,9 +74,32 @@ def fc_layer(input,num_inputs,num_outputs, use_relu = False):
     return layer, weights, biases
 
 def computeCost(actionSoftmax, rewardSet, actionSet):
-    index = tf.range(0, tf.shape(actionSoftmax)[0] * tf.shape(actionSoftmax)[1] + actionSet)
+    """
+    chosen_action = tf.arg_max(actionSoftmax, 1)
+    index = tf.range(0, tf.shape(actionSoftmax)[0]) * tf.shape(actionSoftmax)[1] + actionSet
     resp_outputs = tf.gather(tf.reshape(actionSoftmax, [-1]), index)
+    
     cost = tf.reduce_mean(tf.log(resp_outputs) * rewardSet)
+    return cost
+    """
+    
+    #1 cost model:
+    #reward * discountFactor * predicted_value - oldValue
+    #reward is [? 26]
+    #discount factor = some discrete value
+    #predictedValue
+    """
+    actionTaken = tf.argmax(actionSoftmax, 1)
+    discountFactor = 1
+    actionTaken = tf.reshape(actionTaken, [-1,1])
+    cost = rewardSet + tf.cast(discountFactor * actionTaken, tf.float32) - tf.cast(actionSet, tf.float32)
+    cost = tf.reduce_mean(cost)
+    return cost
+    """
+    
+    #simple test cost    
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits = actionSoftmax,labels=actionSet)
+    cost = tf.reduce_mean(cross_entropy)
     return cost
     
     
@@ -84,6 +109,7 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
     biases_store = []
     
     trainSet, rewardSet, actionSet = generatePlaceholders(XTrain, rewards, actions)
+    
     layer1, weightTemp, biasTemp = conv_net(trainSet, XTrain.shape[3], 8, 10)
     weights_store.append(weightTemp)
     biases_store.append(biasTemp)
@@ -94,10 +120,11 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
     weights_store.append(weightTemp)
     biases_store.append(biasTemp)
     
-    valueOutput = tf.nn.softmax_cross_entropy_with_logits(logits = fully_connected,labels=actionSet)
-    cost = computeCost(valueOutput, rewardSet, actionSet)
+    #valueOutput = tf.nn.softmax_cross_entropy_with_logits(logits = fully_connected,labels=actionSet)
+    cost = computeCost(fully_connected, rewardSet, actionSet)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
     
+    init = tf.global_variables_initializer()
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init)

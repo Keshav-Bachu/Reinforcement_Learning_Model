@@ -7,6 +7,7 @@ Created on Thu Sep 20 15:09:16 2018
 """
 
 import numpy as np
+import ReenforcementLearning as  REL
 
 #numpy 20 x 20 input
 def initialLocation(specificGame, valueFind):
@@ -142,5 +143,8 @@ for gameresult in range (0, gameResults.shape[0]):
         if(gameResults[gameresult][value] != lastScore):
             singleReward[gameresult][value] = gameResults[gameresult][value] - lastScore
             lastScore = gameResults[gameresult][value]
-            
-        
+
+games = games.reshape(games.shape[0] * games.shape[1], games.shape[2], games.shape[3], 1)
+gameResults = gameResults.reshape(gameResults.shape[0] * gameResults.shape[1], 1)
+actionAll = actionAll.reshape(actionAll.shape[0] * actionAll.shape[1], 1)
+outputs = REL.TrainModel(games, gameResults, actionAll)
