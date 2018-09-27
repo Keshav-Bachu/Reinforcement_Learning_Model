@@ -21,18 +21,18 @@ def initialLocation(specificGame, valueFind):
 def nextLocation(specificGame, valueFind, lastLocX, lastLocY):
     #check left
     if(lastLocX != 0 and specificGame[lastLocY][lastLocX - 1] == valueFind):
-        return lastLocX - 1, lastLocY
+        return lastLocX - 1, lastLocY, 1
    
     elif(lastLocY != 0 and specificGame[lastLocY - 1][lastLocX] == valueFind):
-        return lastLocX, lastLocY - 1
+        return lastLocX, lastLocY - 1, 2
     
     elif(lastLocX != specificGame.shape[1] - 1 and specificGame[lastLocY][lastLocX + 1] == valueFind):
-        return lastLocX + 1, lastLocY
+        return lastLocX + 1, lastLocY, 3
     
     elif(lastLocY != specificGame.shape[0] - 1 and specificGame[lastLocY + 1][lastLocX] == valueFind):
-        return lastLocX, lastLocY + 1
+        return lastLocX, lastLocY + 1, 4
     
-    return lastLocX, lastLocY
+    return lastLocX, lastLocY, 0
 
 def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     leftSide = max(lastLocX - observationSize, 0)
@@ -107,26 +107,33 @@ firstTurn = True
 
 turns = []
 games = []
+actionAll = []
 
 #observe off of one 
 for game in gameObservations:
     turns = []
+    action = []
+    actionTaken = -1
     #find the initial location of a piece to observe
     for turn in game:
         if firstTurn:
             firstTurn = False
             locX, locY = initialLocation(turn, 4)
+            actionTaken = 0
         else:
-            locX, locY = nextLocation(turn, 4, locX, locY)
+            locX, locY, actionTaken = nextLocation(turn, 4, locX, locY)
             
         observationSpace = getObservations(turn, 2, locX, locY)
         observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
         #print(observationSpace, '\n')
         turns.append(observationSpace)
+        action.append(actionTaken)
     turns = np.asanyarray(turns)
     games.append(turns)
+    actionAll.append(action)
 games = np.asanyarray(games)
 singleReward = np.zeros(gameResults.shape)
+actionAll = np.asanyarray(actionAll)
 
 for gameresult in range (0, gameResults.shape[0]):
     lastScore = 0
