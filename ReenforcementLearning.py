@@ -89,7 +89,7 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     #discount factor = some discrete value
     #predictedValue
     
-    
+    """
     actionSoftmax = tf.argmax(actionSoftmax, 1)
     discountFactor = 1
     actionSoftmax = tf.reshape(actionSoftmax, [-1,1])
@@ -97,7 +97,7 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32), reduction_indices=[1]))
     cost = tf.reduce_mean(cross_entropy)
     return cost
-    
+    """
     
     
     """
