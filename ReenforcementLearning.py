@@ -8,6 +8,13 @@ Created on Thu Sep 20 13:45:30 2018
 import numpy as np
 import tensorflow as tf
 
+def create_weights(shape):
+    return tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+
+def create_biases(size):
+    return tf.Variable(tf.constant(0.05, shape=[size]))
+
+
 def decaying_Reward(rewardSet):
     decayedReward = np.zeros(rewardSet.shape())
     gamma = 0.99
@@ -64,11 +71,43 @@ def fc_layer(input,num_inputs,num_outputs, use_relu = False):
         
     return layer, weights, biases
 
-
-def ReplayNetworkModel(Xplaceholders, Yplaceholders):
-    conv_layer1, weightTemp, biasTemp = conv_net(x, x.shape[3], 8, 10)
+def computeCost(actionSoftmax, rewardSet, actionSet):
+    index = tf.range(0, tf.shape(actionSoftmax)[0] * tf.shape(actionSoftmax)[1] + actionSet)
+    resp_outputs = tf.gather(tf.reshape(actionSoftmax, [-1]), index)
+    cost = tf.reduce_mean(tf.log(resp_outputs) * rewardSet)
+    return cost
     
     
+def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500):
+    costs = []
+    weights_store = []
+    biases_store = []
     
-def TrainModel(XTrain, Y):
+    trainSet, rewardSet, actionSet = generatePlaceholders(XTrain, rewards, actions)
+    layer1, weightTemp, biasTemp = conv_net(trainSet, XTrain.shape[3], 8, 10)
+    weights_store.append(weightTemp)
+    biases_store.append(biasTemp)
+    
+    flattened = flatten(layer1)
+    
+    fully_connected, weightTemp, biasTemp = fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 4)
+    weights_store.append(weightTemp)
+    biases_store.append(biasTemp)
+    
+    valueOutput = tf.nn.softmax_cross_entropy_with_logits(logits = fully_connected,labels=actionSet)
+    cost = computeCost(valueOutput, rewardSet, actionSet)
+    optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
+    
+    init = tf.global_variables_initializer()
+    with tf.Session() as sess:
+        sess.run(init)
+        temp_cost = 0
+        for itter in range (itterations):
+            _,temp_cost, check = sess.run([optimizer, cost, fully_connected], feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions})
+            
+            if(itter % 100 == 0):
+                print("Current cost of the function after itteraton " + str(itter) + " is: \t" + str(temp_cost))
+                
+            costs.append(temp_cost)
+            
     
