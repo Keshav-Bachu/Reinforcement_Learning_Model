@@ -94,11 +94,27 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     discountFactor = 1
     actionSoftmax = tf.reshape(actionSoftmax, [-1,1])
     #cross_entropy = rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32)
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32), reduction_indices=[1]))
+    cross_entropy = (-tf.reduce_sum(rewardSet + tf.cast(discountFactor * actionSoftmax, tf.float32) - tf.cast(actionSet, tf.float32), reduction_indices=[1]))
     cost = tf.reduce_mean(cross_entropy)
     return cost
     """
     
+    #the action taken by the network
+    actionMax = tf.argmax(actionSoftmax,1)
+    actionMax = tf.reshape(actionMax, [-1, 1])
+    actionMax = tf.cast(actionMax, tf.float32)
+    
+    discountFactor = tf.constant(0.1, tf.float32)
+    learnedValue = actionMax * discountFactor + rewardSet
+    cross_entropy = learnedValue - actionSet
+    cost = tf.reduce_mean(actionSoftmax)
+    return cost
+
+
+    """
+    cost = tf.reduce_mean(actionSoftmax)
+    return cost
+    """
     
     """
     #simple test cost    
