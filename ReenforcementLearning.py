@@ -5,6 +5,7 @@ Created on Thu Sep 20 13:45:30 2018
 
 @author: keshavbachu
 """
+#note on next part, implimentation of the experience replay on single cells
 import numpy as np
 import tensorflow as tf
 
