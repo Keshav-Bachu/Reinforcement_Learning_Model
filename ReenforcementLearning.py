@@ -124,6 +124,24 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     return cost
     """
     
+def expReplayHelper(finalLayer, h_size, actions):
+    streamQ = tf.layers.flatten(finalLayer)
+    xavier_init = tf.contrib.layers.xavier_initializer()
+    QW  = tf.Variable(xavier_init([h_size, actions]))
+    Qout = tf.matmul(streamQ, QW)
+    
+    predict = tf.arg_max(Qout, 1)
+    
+    targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
+    actions = tf.placeholder(shape=[None],dtype=tf.int32)
+    actions_onehot = tf.one_hot(self.actions,env.actions,dtype=tf.float32)
+
+    Q = tf.reduce_sum(tf.multiply(self.Qout, self.actions_onehot), axis=1)
+
+    td_error = tf.square(self.targetQ - self.Q)
+    loss = tf.reduce_mean(self.td_error)
+    
+    return loss
     
 def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500):
     costs = []
