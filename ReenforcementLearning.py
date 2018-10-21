@@ -160,3 +160,7 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
             costs.append(temp_cost)
             
     
+    #get the weights
+        calcTaken = tf.arg_max(fully_connected, 1)
+        weights, biases, actionsTaken = sess.run([weights_store, biases_store, calcTaken], feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions})
+    return weights, biases, actionsTaken
