@@ -134,12 +134,12 @@ def expReplayHelper(finalLayer, h_size, actions):
     
     targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
     actions = tf.placeholder(shape=[None],dtype=tf.int32)
-    actions_onehot = tf.one_hot(self.actions,env.actions,dtype=tf.float32)
+    actions_onehot = tf.one_hot(actions, actions,dtype=tf.float32)
 
-    Q = tf.reduce_sum(tf.multiply(self.Qout, self.actions_onehot), axis=1)
+    Q = tf.reduce_sum(tf.multiply(Qout, actions_onehot), axis=1)
 
-    td_error = tf.square(self.targetQ - self.Q)
-    loss = tf.reduce_mean(self.td_error)
+    td_error = tf.square(targetQ - Q)
+    loss = tf.reduce_mean(td_error)
     
     return loss
     
