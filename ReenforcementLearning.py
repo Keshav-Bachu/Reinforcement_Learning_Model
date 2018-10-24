@@ -123,8 +123,12 @@ def computeCost(actionSoftmax, rewardSet, actionSet):
     cost = tf.reduce_mean(cross_entropy)
     return cost
     """
-    
-def expReplayHelper(finalLayer, h_size, actions):
+"""
+finalLayer: final layer of the NN before calculations
+h_size: "The size of the final convolutional layer before splitting it into Advantage and Value streams"
+actions: Number of available actions 
+"""
+def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 4, actions = 4):
     streamQ = tf.layers.flatten(finalLayer)
     xavier_init = tf.contrib.layers.xavier_initializer()
     QW  = tf.Variable(xavier_init([h_size, actions]))
@@ -132,9 +136,9 @@ def expReplayHelper(finalLayer, h_size, actions):
     
     predict = tf.arg_max(Qout, 1)
     
-    targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
-    actions = tf.placeholder(shape=[None],dtype=tf.int32)
-    actions_onehot = tf.one_hot(actions, actions,dtype=tf.float32)
+    #targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
+    #self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
+    actions_onehot = tf.one_hot(self_actions, actions,dtype=tf.float32)
 
     Q = tf.reduce_sum(tf.multiply(Qout, actions_onehot), axis=1)
 
@@ -149,6 +153,8 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
     biases_store = []
     
     trainSet, rewardSet, actionSet = generatePlaceholders(XTrain, rewards, actions)
+    targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
+    self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
     
     layer1, weightTemp, biasTemp = conv_net(trainSet, XTrain.shape[3], 8, 10)
     weights_store.append(weightTemp)
@@ -161,7 +167,8 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
     biases_store.append(biasTemp)
     
     #valueOutput = tf.nn.softmax_cross_entropy_with_logits(logits = fully_connected,labels=actionSet)
-    cost = computeCost(fully_connected, rewardSet, actionSet)
+    #cost = computeCost(fully_connected, rewardSet, actionSet)
+    cost = expReplayHelper(fully_connected, targetQ, self_actions)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
     
     init = tf.global_variables_initializer()
@@ -170,7 +177,7 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.01, itterations = 500
         sess.run(init)
         temp_cost = 0
         for itter in range (itterations):
-            _,temp_cost, check = sess.run([optimizer, cost, fully_connected], feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions})
+            _,temp_cost, check = sess.run([optimizer, cost, fully_connected], feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: rewardSet, self_actions:actions})
             
             if(itter % 100 == 0):
                 print("Current cost of the function after itteraton " + str(itter) + " is: \t" + str(temp_cost))
