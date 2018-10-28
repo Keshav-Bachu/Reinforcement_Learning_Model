@@ -34,7 +34,9 @@ Inputs:
     lastLocX: Previous X value used, to make sure same unit is observed
     lastLocY: Previous Y value used, to make sure same unit is observed
 Outputs:
-    
+    Moved location of object and action it took
+
+Determine the next location of the unit 
 """
 def nextLocation(specificGame, valueFind, lastLocX, lastLocY):
     #check left
@@ -52,6 +54,17 @@ def nextLocation(specificGame, valueFind, lastLocX, lastLocY):
     
     return lastLocX, lastLocY, 0
 
+"""
+Input:
+    specificGame: The game that is being looked at 
+    observationSize: The observation space that the unit can look at
+    lastLocX: Previous X value used, to make sure same unit is observed
+    lastLocY: Previous Y value used, to make sure same unit is observed
+Outputs:
+    Returns specific game frame
+    
+Takes a specific frame interval for the observation windows
+"""
 def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     leftSide = max(lastLocX - observationSize, 0)
     rightSide = min(lastLocX + observationSize, specificGame.shape[1] - 1)
@@ -61,6 +74,15 @@ def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     
     return specificGame[topSide:bottomSide + 1 ,leftSide:rightSide + 1]
 
+"""
+Inputs:
+    observation: The observations outputted from the function above
+    objectpad: The value that can be padded for the observation space
+    observationSpace: The size of the observation window
+    objectLook: Object that we need to look for in observation
+Output:
+    PAdded array of the observations so the size is all the same
+"""
 def addPadding(observation, objectpad, observationSpace, objectLook):
     
     #horz padding
