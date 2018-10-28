@@ -9,7 +9,16 @@ Created on Thu Sep 20 15:09:16 2018
 import numpy as np
 import ReenforcementLearning as  REL
 
-#numpy 20 x 20 input
+
+"""
+Inputs:
+    specificGame: The game that is being looked at
+    valueFind: The value we are observing upon
+Outputs:
+    i, j: x and y coordiantes of the value being looked upon
+
+Searches an individual game for a value and return the coordinates of the first instance of the value
+"""
 def initialLocation(specificGame, valueFind):
     for i in range(specificGame.shape[1]): #cols
         for j in range(specificGame.shape[0]): #rows
@@ -18,7 +27,15 @@ def initialLocation(specificGame, valueFind):
             
     return -1, -1
 
-#check all 4 dir for the object next position
+"""
+Inputs:
+    specificGame: The game that is being looked at
+    valueFind: The value we are observing upon
+    lastLocX: Previous X value used, to make sure same unit is observed
+    lastLocY: Previous Y value used, to make sure same unit is observed
+Outputs:
+    
+"""
 def nextLocation(specificGame, valueFind, lastLocX, lastLocY):
     #check left
     if(lastLocX != 0 and specificGame[lastLocY][lastLocX - 1] == valueFind):
