@@ -124,7 +124,8 @@ def addPadding(observation, objectpad, observationSpace, objectLook):
         
         
     
-    
+
+#Start of the main program
 #load in the X and Y data
 
 gameResults = np.load('/Users/keshavbachu/Documents/User Space/DASLAB Assignment/ctf_public-Release/gameResults.npy')
