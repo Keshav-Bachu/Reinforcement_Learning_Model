@@ -172,6 +172,7 @@ for game in gameObservations:
     turns = np.asanyarray(turns)
     games.append(turns)
     actionAll.append(action)
+    firstTurn = True
 games = np.asanyarray(games)
 singleReward = np.zeros(gameResults.shape)
 actionAll = np.asanyarray(actionAll)
