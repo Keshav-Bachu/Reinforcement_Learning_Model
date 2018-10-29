@@ -46,19 +46,19 @@ def conv_net(input_data, num_input_channels, filter_shape, num_filters, weights 
     #weights = create_weights(shape=[conv_filter_size, conv_filter_size, num_input_channels, num_filters])
     conv_filt_shape = [filter_shape,filter_shape, num_input_channels, num_filters]
     
-    if(weights == None):
+    if(type(weights) == None):
         weights = create_weights(conv_filt_shape)
-        bias = create_biases(num_filters)
+        biases = create_biases(num_filters)
     else:
         weights = tf.convert_to_tensor(weights, dtype=tf.float32)
         biases = tf.convert_to_tensor(biases, dtype=tf.float32)
     
     out_layer = tf.nn.conv2d(input=input_data, filter= weights, strides= [1, 1, 1, 1], padding='SAME')
-    out_layer += bias
+    out_layer += biases
     out_layer = tf.nn.max_pool(value=out_layer, ksize=[1,2,2,1], strides=[1, 2, 2, 1], padding='SAME')
     out_layer = tf.nn.relu(out_layer)
     
-    return out_layer, weights, bias
+    return out_layer, weights, biases
     
 def flatten(layer):
     layer_shape = layer.get_shape()
@@ -70,7 +70,7 @@ def flatten(layer):
 
 def fc_layer(input,num_inputs,num_outputs, use_relu = False, weights = None, biases = None):
     
-    if(weights == None):
+    if(type(weights) == None):
         weights = create_weights(shape=[num_inputs, num_outputs])
         biases = create_biases(num_outputs)
     else:

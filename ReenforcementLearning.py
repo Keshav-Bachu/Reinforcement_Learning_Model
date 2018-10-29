@@ -83,9 +83,9 @@ def makePredictions(Xinput, weights, biases):
     trainSet, _, _ = helper.generatePlaceholders(Xinput, Xinput, Xinput)
     
     #construct the model to predict on
-    layer1, _, _ = helper.conv_net(trainSet, Xinput.shape[3], 8, 10)
+    layer1, _, _ = helper.conv_net(trainSet, Xinput.shape[3], 8, 10, weights[0], biases[0])
     flattened = helper.flatten(layer1)
-    fully_connected, _, _ = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 4)
+    fully_connected, _, _ = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 4, weights = weights[1], biases = biases[1])
 
     init = tf.global_variables_initializer()
 
