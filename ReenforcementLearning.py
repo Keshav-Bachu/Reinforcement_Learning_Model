@@ -22,7 +22,7 @@ Output:
 
 Trains the model and updates/makes weights/biases
 """
-def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 500):
+def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2000, weights = None, biases = None):
     qInput = rewards.reshape(rewards.shape[0])
     self_actions_input = actions.reshape(actions.shape[0])
     
@@ -30,27 +30,52 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 5
     weights_store = []
     biases_store = []
     
-    trainSet, rewardSet, actionSet = helper.generatePlaceholders(XTrain, rewards, actions)
-    targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
-    self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
+    if(type(weights) != list and type(weights) != np.ndarray):
+        trainSet, rewardSet, actionSet = helper.generatePlaceholders(XTrain, rewards, actions)
+        targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
+        self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
+        
+        layer1, weightTemp, biasTemp = helper.conv_net(trainSet, XTrain.shape[3], 4, 10)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 4, 8)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        flattened = helper.flatten(layer2)
+        
+        fully_connected1, weightTemp, biasTemp = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 64)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        fully_connected2, weightTemp, biasTemp = helper.fc_layer(fully_connected1, fully_connected1.get_shape()[1:4].num_elements(), 4)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
     
-    layer1, weightTemp, biasTemp = helper.conv_net(trainSet, XTrain.shape[3], 4, 10)
-    weights_store.append(weightTemp)
-    biases_store.append(biasTemp)
+    else:
+        trainSet, rewardSet, actionSet = helper.generatePlaceholders(XTrain, rewards, actions)
+        targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
+        self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
+        
+        layer1, weightTemp, biasTemp = helper.conv_net(trainSet, XTrain.shape[3], 4, 10,  weights[0], biases[0], layerNumber = 0)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 4, 8,  weights[1], biases[1], layerNumber = 1)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        flattened = helper.flatten(layer2)
+        
+        fully_connected1, weightTemp, biasTemp = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 64,  weights = weights[2], biases = biases[2], layerNumber = 2)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
+        
+        fully_connected2, weightTemp, biasTemp = helper.fc_layer(fully_connected1, fully_connected1.get_shape()[1:4].num_elements(), 4,  weights = weights[3], biases = biases[3], layerNumber = 3)
+        weights_store.append(weightTemp)
+        biases_store.append(biasTemp)
     
-    layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 4, 8)
-    weights_store.append(weightTemp)
-    biases_store.append(biasTemp)
-    
-    flattened = helper.flatten(layer2)
-    
-    fully_connected1, weightTemp, biasTemp = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 64)
-    weights_store.append(weightTemp)
-    biases_store.append(biasTemp)
-    
-    fully_connected2, weightTemp, biasTemp = helper.fc_layer(fully_connected1, fully_connected1.get_shape()[1:4].num_elements(), 4)
-    weights_store.append(weightTemp)
-    biases_store.append(biasTemp)
     
     #valueOutput = tf.nn.softmax_cross_entropy_with_logits(logits = fully_connected,labels=actionSet)
     #cost = computeCost(fully_connected, rewardSet, actionSet)

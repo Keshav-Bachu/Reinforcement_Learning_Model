@@ -42,7 +42,7 @@ def generatePlaceholders(trainX, trainReward, trainAction):
     
     return Xtrain, rewardTrain, actionTrain
     
-def conv_net(input_data, num_input_channels, filter_shape, num_filters, weights = None, biases = None):
+def conv_net(input_data, num_input_channels, filter_shape, num_filters, weights = None, biases = None, layerNumber = 0):
     #weights = create_weights(shape=[conv_filter_size, conv_filter_size, num_input_channels, num_filters])
     conv_filt_shape = [filter_shape,filter_shape, num_input_channels, num_filters]
     
@@ -50,8 +50,10 @@ def conv_net(input_data, num_input_channels, filter_shape, num_filters, weights 
         weights = create_weights(conv_filt_shape)
         biases = create_biases(num_filters)
     else:
-        weights = tf.convert_to_tensor(weights, dtype=tf.float32)
-        biases = tf.convert_to_tensor(biases, dtype=tf.float32)
+        weights = tf.Variable(tf.convert_to_tensor(weights, dtype=tf.float32))
+        biases = tf.Variable(tf.convert_to_tensor(biases, dtype=tf.float32))
+        #weights = tf.get_variable(name = "weight" + str(layerNumber), initializer = weights)
+        #biases = tf.get_variable(name = "bias" + str(layerNumber), initializer = biases)
     
     out_layer = tf.nn.conv2d(input=input_data, filter= weights, strides= [1, 1, 1, 1], padding='SAME')
     out_layer += biases
@@ -68,14 +70,16 @@ def flatten(layer):
     return layer
  
 
-def fc_layer(input,num_inputs,num_outputs, use_relu = False, weights = None, biases = None):
+def fc_layer(input,num_inputs,num_outputs, use_relu = False, weights = None, biases = None, layerNumber = 0):
     
     if(type(weights) != np.ndarray):
         weights = create_weights(shape=[num_inputs, num_outputs])
         biases = create_biases(num_outputs)
     else:
-        weights = tf.convert_to_tensor(weights, dtype=tf.float32)
-        biases = tf.convert_to_tensor(biases, dtype=tf.float32)
+        weights = tf.Variable(tf.convert_to_tensor(weights, dtype=tf.float32))
+        biases = tf.Variable(tf.convert_to_tensor(biases, dtype=tf.float32))
+        #weights = tf.get_variable(name = "weight" + str(layerNumber), initializer = weights)
+        #biases = tf.get_variable(name = "bias" + str(layerNumber), initializer = biases)
  
     layer = tf.matmul(input, weights) + biases
     if(use_relu == True):
