@@ -38,11 +38,11 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 5
     weights_store.append(weightTemp)
     biases_store.append(biasTemp)
     
-    layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 8, 8)
+    layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 4, 8)
     weights_store.append(weightTemp)
     biases_store.append(biasTemp)
     
-    flattened = helper.flatten(layer1)
+    flattened = helper.flatten(layer2)
     
     fully_connected1, weightTemp, biasTemp = helper.fc_layer(flattened, flattened.get_shape()[1:4].num_elements(), 64)
     weights_store.append(weightTemp)
