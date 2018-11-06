@@ -15,7 +15,7 @@ def generateAllLocations(fieldView, unitObserve):
     
     return AllLocations
                 
-def generateOutputs(fieldView, unitObserve):
+def generateOutputs(fieldView, unitObserve, weights, biases):
     AllLocations = []
     AllObservations = []
     AllLocations = generateAllLocations(fieldView, unitObserve)
@@ -25,5 +25,9 @@ def generateOutputs(fieldView, unitObserve):
         temp = FormatData.addPadding(temp, objectpad=-1, observationSpace = 2, objectLook = 4)
         
         AllObservations.append(temp)
+    AllObservations = np.asanyarray(AllObservations)
+    predictions = REL.makePredictions(weights, biases)
+
+    return predictions
         
         
