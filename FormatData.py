@@ -6,8 +6,8 @@ Created on Thu Sep 20 15:09:16 2018
 @author: keshavbachu
 """
 
-import numpy as np
-import ReenforcementLearning as  REL
+#import numpy as np
+#import ReenforcementLearning as  REL
 
 
 """
@@ -122,74 +122,75 @@ def addPadding(observation, objectpad, observationSpace, objectLook):
             
     return observation
         
-   
-#Start of the main program
-#load in the X and Y data
-
-gameResults = np.load('Data Folder/gameResults.npy')
-gameObservations = np.load('Data Folder/gameTrain.npy')
-
-
-#gameResults: [# Examples, turns, observation.shape[0], observation.shape[1]]
-#Storage of all the observed values within the system
-gameResults = gameResults[()]
-
-#gameResults: [# Examples, turn limit]
-#The results of the game represented by a score
-gameObservations = gameObservations[()]
-
-
-locX = -1;
-locY = -1;
-observationSpace = None
-firstTurn = True
-
-turns = []
-games = []
-actionAll = []
-
-#observe off of one 
-for game in gameObservations:
-    turns = []
-    action = []
-    actionTaken = -1
-    #find the initial location of a piece to observe
-    for turn in game:
-        if firstTurn:
-            firstTurn = False
-            locX, locY = initialLocation(turn, 4)
-            actionTaken = 0
-        else:
-            locX, locY, actionTaken = nextLocation(turn, 4, locX, locY)
-            
-        observationSpace = getObservations(turn, 2, locX, locY)
-        observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
-        #print(observationSpace, '\n')
-        turns.append(observationSpace)
-        action.append(actionTaken)
-    turns = np.asanyarray(turns)
-    games.append(turns)
-    actionAll.append(action)
+ 
+def main():
+    #Start of the main program
+    #load in the X and Y data
+    
+    gameResults = np.load('Data Folder/gameResults.npy')
+    gameObservations = np.load('Data Folder/gameTrain.npy')
+    
+    
+    #gameResults: [# Examples, turns, observation.shape[0], observation.shape[1]]
+    #Storage of all the observed values within the system
+    gameResults = gameResults[()]
+    
+    #gameResults: [# Examples, turn limit]
+    #The results of the game represented by a score
+    gameObservations = gameObservations[()]
+    
+    
+    locX = -1;
+    locY = -1;
+    observationSpace = None
     firstTurn = True
-games = np.asanyarray(games)
-singleReward = np.zeros(gameResults.shape)
-actionAll = np.asanyarray(actionAll)
-
-for gameresult in range (0, gameResults.shape[0]):
-    lastScore = 0
-    for value in range(0, gameResults.shape[1]):
-        #print(gameresult, " ", value)
-        if(gameResults[gameresult][value] != lastScore):
-            singleReward[gameresult][value] = gameResults[gameresult][value] - lastScore
-            lastScore = gameResults[gameresult][value]
-
-games = games.reshape(games.shape[0] * games.shape[1], games.shape[2], games.shape[3], 1)
-gameResults = gameResults.reshape(gameResults.shape[0] * gameResults.shape[1], 1)
-actionAll = actionAll.reshape(actionAll.shape[0] * actionAll.shape[1], 1)
-
-weights, biases, actionsTaken, actionsExploration, qouts = REL.TrainModel(games, gameResults, actionAll, itterations = 30000)
-#tf.reset_default_graph()
-#REL.makePredictions(games, weights, biases)
-
-#weights, biases, actionsTaken, actionsExploration = REL.TrainModel(games, gameResults, actionAll, itterations = 1000, weights = weights, biases = biases)
-#REL.TrainModel(games, gameResults, actionAll, itterations = 1000, QWInput = qout, weights = weights, biases = biases)
+    
+    turns = []
+    games = []
+    actionAll = []
+    
+    #observe off of one 
+    for game in gameObservations:
+        turns = []
+        action = []
+        actionTaken = -1
+        #find the initial location of a piece to observe
+        for turn in game:
+            if firstTurn:
+                firstTurn = False
+                locX, locY = initialLocation(turn, 4)
+                actionTaken = 0
+            else:
+                locX, locY, actionTaken = nextLocation(turn, 4, locX, locY)
+                
+            observationSpace = getObservations(turn, 2, locX, locY)
+            observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
+            #print(observationSpace, '\n')
+            turns.append(observationSpace)
+            action.append(actionTaken)
+        turns = np.asanyarray(turns)
+        games.append(turns)
+        actionAll.append(action)
+        firstTurn = True
+    games = np.asanyarray(games)
+    singleReward = np.zeros(gameResults.shape)
+    actionAll = np.asanyarray(actionAll)
+    
+    for gameresult in range (0, gameResults.shape[0]):
+        lastScore = 0
+        for value in range(0, gameResults.shape[1]):
+            #print(gameresult, " ", value)
+            if(gameResults[gameresult][value] != lastScore):
+                singleReward[gameresult][value] = gameResults[gameresult][value] - lastScore
+                lastScore = gameResults[gameresult][value]
+    
+    games = games.reshape(games.shape[0] * games.shape[1], games.shape[2], games.shape[3], 1)
+    gameResults = gameResults.reshape(gameResults.shape[0] * gameResults.shape[1], 1)
+    actionAll = actionAll.reshape(actionAll.shape[0] * actionAll.shape[1], 1)
+    
+    weights, biases, actionsTaken, actionsExploration, qouts = REL.TrainModel(games, gameResults, actionAll, itterations = 30000)
+    #tf.reset_default_graph()
+    #REL.makePredictions(games, weights, biases)
+    
+    #weights, biases, actionsTaken, actionsExploration = REL.TrainModel(games, gameResults, actionAll, itterations = 1000, weights = weights, biases = biases)
+    #REL.TrainModel(games, gameResults, actionAll, itterations = 1000, QWInput = qout, weights = weights, biases = biases)

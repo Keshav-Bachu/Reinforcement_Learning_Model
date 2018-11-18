@@ -7,7 +7,7 @@ Created on Thu Sep 20 13:45:30 2018
 """
 import numpy as np
 import tensorflow as tf
-import ModelTrainHelper as helper
+#import ModelTrainHelper as helper
 
 """
 Input:
