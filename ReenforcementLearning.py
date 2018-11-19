@@ -7,6 +7,7 @@ Created on Thu Sep 20 13:45:30 2018
 """
 import numpy as np
 import tensorflow as tf
+from Reinforcement_Learning_Model import ModelTrainHelper as helper
 #import ModelTrainHelper as helper
 
 """
@@ -120,6 +121,7 @@ Inputs:
 Outputs:
     actionsTaken: The action to take, determined from the model
 """
+#add random exploration actions!
 def makePredictions(Xinput, weights, biases, QW):
     #Construct the model and return predictions about the model
     trainSet, _, _ = helper.generatePlaceholders(Xinput, Xinput, Xinput)

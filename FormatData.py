@@ -6,7 +6,7 @@ Created on Thu Sep 20 15:09:16 2018
 @author: keshavbachu
 """
 
-#import numpy as np
+import numpy as np
 #import ReenforcementLearning as  REL
 
 
@@ -68,7 +68,6 @@ Takes a specific frame interval for the observation windows
 def getObservations(specificGame, observationSize, lastLocX, lastLocY):
     leftSide = max(lastLocX - observationSize, 0)
     rightSide = min(lastLocX + observationSize, specificGame.shape[1] - 1)
-    
     topSide = max(lastLocY - observationSize, 0)
     bottomSide = min(lastLocY + observationSize, specificGame.shape[0] - 1)
     
