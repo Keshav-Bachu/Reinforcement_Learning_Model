@@ -44,8 +44,8 @@ def generateOutputs(fieldView, unitObserve, weights, biases, QW):
     return predictions[0]
 
 def generateFromLocation(fieldView, unitLocation, weights, biases, QW):
-    AllLocations = []
-    AllLocations.append(unitLocation)
+    AllLocations = unitLocation
+    #AllLocations.append(unitLocation)
     AllObservations = []
     #AllLocations = generateAllLocations(fieldView, unitObserve)
     for i in AllLocations:

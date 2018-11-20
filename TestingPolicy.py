@@ -38,19 +38,28 @@ class PolicyGen:
         weights = np.load("Reinforcement_Learning_Model/Weights/Itteration 1/weights.npy")
         biases = np.load("Reinforcement_Learning_Model/Weights/Itteration 1/biases.npy")
         QW = np.load("Reinforcement_Learning_Model/Weights/Itteration 1/QW.npy")
-        
+        """
         for idx,agent in enumerate(agent_list):
             a = self.generateAction(agent, observation, weights, biases, QW)
             action_out.append(a)
+        """
 
+        action_out = self.generateAction(agent_list, observation, weights, biases, QW)
         return action_out
         
 
-    def generateAction(self, agent, obs, weights, biases, QW):
+    def generateAction(self, agent_list, obs, weights, biases, QW):
         """Generate 1 action for given agent object."""
-        x,y = agent.get_loc()
-        locArray = np.asanyarray([y,x])
-        action = Model.generateFromLocation(obs, locArray, weights, biases, QW)
+        locationSet = []
+        locationArray = []
+
+        for idx, agent in enumerate(agent_list):
+            x,y = agent.get_loc()
+            locationArray = np.asanyarray([y,x])
+            locationSet.append(locationArray)
+        locationSet = np.asanyarray(locationSet)
+
+        action = Model.generateFromLocation(obs, locationSet, weights, biases, QW)
         
-        #print(action[0])
-        return action[0]
+        print(action)
+        return action

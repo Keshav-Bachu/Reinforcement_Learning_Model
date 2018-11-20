@@ -23,6 +23,7 @@ Output:
 
 Trains the model and updates/makes weights/biases
 """
+#change to use inherent TF stuff sometime
 def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2000, weights = None, biases = None, QWInput = None):
     qInput = rewards.reshape(rewards.shape[0])
     self_actions_input = actions.reshape(actions.shape[0])
@@ -137,11 +138,17 @@ def makePredictions(Xinput, weights, biases, QW):
 
     QW = tf.Variable(tf.convert_to_tensor(QW, dtype = tf.float32))
     Qout = tf.matmul(fully_connected2, QW)
+    
     predict = tf.arg_max(Qout, 1)
+    randomProbability = tf.random_uniform(tf.shape(predict), 0,1)
+    randomDecision = tf.random_uniform(tf.shape(predict), 0,5, tf.int32)
+    #finalOutput = tf.cond(randomProbability < boundsFactor, lambda: tf.identity(randomDecision), lambda: tf.identity(predict))
+    finalOutput = tf.where(randomProbability < 0.3, tf.cast(randomDecision, tf.int32), tf.cast(predict, tf.int32))
+    
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
         sess.run(init)
         calcTaken = tf.arg_max(fully_connected2, 1)
-        actionsTaken = sess.run([predict], feed_dict={trainSet: Xinput})
+        actionsTaken = sess.run([finalOutput], feed_dict={trainSet: Xinput})
     return actionsTaken
