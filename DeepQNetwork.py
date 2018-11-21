@@ -129,6 +129,9 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
     rList = []
     total_steps = 0
     
+    #Make a path for our model to be saved in.
+    if not os.path.exists(path):
+        os.makedirs(path)
     
     with tf.Session() as sess:
         sess.run(init)
