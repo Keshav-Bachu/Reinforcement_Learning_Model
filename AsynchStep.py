@@ -15,8 +15,8 @@ Created on Thu Sep 20 13:45:30 2018
 """
 import numpy as np
 import tensorflow as tf
-from Reinforcement_Learning_Model import ModelTrainHelper as helper
-#import ModelTrainHelper as helper
+#from Reinforcement_Learning_Model import ModelTrainHelper as helper
+import ModelTrainHelper as helper
 Target = 100
 Asynch = 10
 

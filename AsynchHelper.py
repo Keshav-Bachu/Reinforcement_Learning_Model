@@ -12,6 +12,7 @@ finalLayer: final layer of the NN before calculations
 h_size: "The size of the final convolutional layer before splitting it into Advantage and Value streams"
 actions: Number of available actions 
 """
+
 def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 5, actions = 5, QWIN = None, itterationNum, loss = 0):
     #streamQ = tf.layers.flatten(finalLayer)
     streamQ = finalLayer

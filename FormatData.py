@@ -7,7 +7,7 @@ Created on Thu Sep 20 15:09:16 2018
 """
 
 import numpy as np
-#import ReenforcementLearning as  REL
+import ReenforcementLearning as  REL
 
 
 """
@@ -120,9 +120,30 @@ def addPadding(observation, objectpad, observationSpace, objectLook):
             
             
     return observation
+
+def removeDeadTurns(actionAll, games, gameResults):
+    maxLength = len(gameResults)
+    i = 0
+    while (i < maxLength):
+        if(actionAll[i] == 0):
+            actionAll = np.delete(actionAll, i, 0)
+            games = np.delete(games, i, 0)
+            gameResults = np.delete(gameResults, i, 0)
+            i -= 1
+            maxLength -= 1
+        i += 1
+            
+            
+    return actionAll, games, gameResults
+
+def deadTurnsWrapper(actionAll, games, gameResults):
+    for i in range(len(actionAll)):
+        actionAll[i], games[i], gameResults[i] = removeDeadTurns(actionAll[i], games[i], gameResults[i])
+        
+    return actionAll, games, gameResults
         
  
-def main():
+def oneTurnObservation():
     #Start of the main program
     #load in the X and Y data
     
@@ -187,9 +208,124 @@ def main():
     gameResults = gameResults.reshape(gameResults.shape[0] * gameResults.shape[1], 1)
     actionAll = actionAll.reshape(actionAll.shape[0] * actionAll.shape[1], 1)
     
-    weights, biases, actionsTaken, actionsExploration, qouts = REL.TrainModel(games, gameResults, actionAll, itterations = 30000)
+    actionAll, games, gameResults = removeDeadTurns(actionAll, games, gameResults)
+    
+    #weights, biases, actionsTaken, actionsExploration, qouts = REL.TrainModel(games, gameResults, actionAll, itterations = 30000)
     #tf.reset_default_graph()
     #REL.makePredictions(games, weights, biases)
     
     #weights, biases, actionsTaken, actionsExploration = REL.TrainModel(games, gameResults, actionAll, itterations = 1000, weights = weights, biases = biases)
     #REL.TrainModel(games, gameResults, actionAll, itterations = 1000, QWInput = qout, weights = weights, biases = biases)
+
+def intoExperience(obsLength, turns, rewards, actions):
+    finalGames = []
+    finalRewards = []
+    finalActions = []
+    totalGames = []
+    for j in range(len(turns)):
+        i = turns[j]
+        if(len(totalGames) < obsLength):
+            totalGames.append(i)
+        else:
+            finalGames.append(np.asanyarray(totalGames))
+            del totalGames[0]
+            totalGames.append(i)
+            finalRewards.append(rewards[i])
+            finalActions.append(actions[i])
+    
+    finalGames.append(np.asanyarray(totalGames))
+    finalRewards.append(rewards[rewards.shape[0] - 1])
+    finalActions.append(actions[actions.shape[0] - 1])
+    
+    finalGames = np.asanyarray(finalGames)
+    finalRewards = np.asanyarray(finalRewards)
+    finalActions = np.asanyarray(finalActions)
+    
+    return finalGames
+
+def intoExperienceWrapper(obsLength, turns, rewards, actions):
+    for i in range(len(turns)):
+        intoExperience(obsLength, turns[i], rewards[i], actions[i])
+            
+
+def experienceReplayPreprocess(turnObsLength):
+    #Start of the main program
+    #load in the X and Y data
+    
+    gameResults = np.load('Data Folder/gameResults.npy')
+    gameObservations = np.load('Data Folder/gameTrain.npy')
+    
+    
+    #gameResults: [# Examples, turns, observation.shape[0], observation.shape[1]]
+    #Storage of all the observed values within the system
+    gameResults = gameResults[()]
+    
+    #gameResults: [# Examples, turn limit]
+    #The results of the game represented by a score
+    gameObservations = gameObservations[()]
+    
+    
+    locX = -1;
+    locY = -1;
+    observationSpace = None
+    firstTurn = True
+    
+    turns = []
+    games = []
+    actionAll = []
+    
+    #observe off of one 
+    for game in gameObservations:
+        turns = []
+        action = []
+        actionTaken = -1
+        #find the initial location of a piece to observe
+        for turn in game:
+            if firstTurn:
+                firstTurn = False
+                locX, locY = initialLocation(turn, 4)
+                actionTaken = 0
+            else:
+                locX, locY, actionTaken = nextLocation(turn, 4, locX, locY)
+                
+            observationSpace = getObservations(turn, 2, locX, locY)
+            observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
+            #print(observationSpace, '\n')
+            turns.append(observationSpace)
+            action.append(actionTaken)
+        turns = np.asanyarray(turns)
+        games.append(turns)
+        action  = np.asanyarray(action)
+        actionAll.append(action)
+        firstTurn = True
+    singleReward = np.zeros(gameResults.shape)
+    
+    
+    for gameresult in range (0, gameResults.shape[0]):
+        lastScore = 0
+        for value in range(0, gameResults.shape[1]):
+            #print(gameresult, " ", value)
+            if(gameResults[gameresult][value] != lastScore):
+                singleReward[gameresult][value] = gameResults[gameresult][value] - lastScore
+                lastScore = gameResults[gameresult][value]
+    
+    #games = games.reshape(games.shape[0] * games.shape[1], games.shape[2], games.shape[3], 1)
+    #gameResults = gameResults.reshape(gameResults.shape[0] * gameResults.shape[1], 1)
+    resultsList = []
+    for i in range(gameResults.shape[0]):
+        resultsList.append(gameResults[i])
+    
+    #current turn corresponds to next action and reward so shift by 1
+    for i in range(len(actionAll)):
+        temp = actionAll[i][0]
+        actionAll[i] = np.delete(actionAll[i], 0, 0)
+        actionAll[i] = np.append(actionAll[i],temp)
+        
+        resultsList[i] = np.delete(resultsList[i], 0, 0)
+        resultsList[i] = np.append(resultsList[i], resultsList[i][resultsList[i].shape[0] - 1])
+    
+    #have games with no dead turns, now need to make each of actionAll into the specific blocks
+    actionAll, games, resultsList = deadTurnsWrapper(actionAll, games, resultsList)
+    intoExperienceWrapper(turnObsLength, games, resultsList, actionAll)
+    
+experienceReplayPreprocess(9)
