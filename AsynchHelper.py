@@ -5,6 +5,8 @@ Created on Tue Nov 20 15:59:03 2018
 
 @author: keshavbachu
 """
+import tensorflow as tf
+import numpy as np
 
 
 """
@@ -13,7 +15,7 @@ h_size: "The size of the final convolutional layer before splitting it into Adva
 actions: Number of available actions 
 """
 
-def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 5, actions = 5, QWIN = None, itterationNum, loss = 0):
+def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 5, actions = 5, QWIN = None, cost = 0):
     #streamQ = tf.layers.flatten(finalLayer)
     streamQ = finalLayer
     xavier_init = tf.contrib.layers.xavier_initializer()
@@ -38,6 +40,6 @@ def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 5, actions = 5, 
     Q = tf.reduce_sum(tf.multiply(Qout, actions_onehot), axis=1)
 
     td_error = tf.square(targetQ - Q)
-    loss += tf.reduce_mean(td_error)
+    loss = tf.reduce_mean(td_error) + cost
     
     return loss, predict, finalOutput, QW

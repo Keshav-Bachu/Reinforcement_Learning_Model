@@ -17,8 +17,9 @@ import numpy as np
 import tensorflow as tf
 #from Reinforcement_Learning_Model import ModelTrainHelper as helper
 import ModelTrainHelper as helper
+import AsynchHelper
 Target = 100
-Asynch = 10
+Asynch = 50
 
 
 """
@@ -36,6 +37,8 @@ Trains the model and updates/makes weights/biases
 """
 #change to use inherent TF stuff sometime
 def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2000, weights = None, biases = None, QWInput = None):
+    qInput = rewards.reshape(rewards.shape[0])
+    self_actions_input = actions.reshape(actions.shape[0])
     costs = []
     weights_store = []
     biases_store = []
@@ -43,7 +46,7 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
     prevSetWeights = []
     prevSetBiases = []
     prevQW = []
-    cost = 0
+    cost = tf.Variable(tf.constant(0, tf.float32))
     
 
     trainSet, rewardSet, actionSet = helper.generatePlaceholders(XTrain, rewards, actions)
@@ -68,12 +71,12 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
     weights_store.append(weightTemp)
     biases_store.append(biasTemp)
     
-    cost, prediction ,finalPrediction, QW = helper.expReplayHelper(fully_connected2, targetQ, self_actions, QWIN = QWInput, cost)
+    cost, prediction ,finalPrediction, QW = AsynchHelper.expReplayHelper(fully_connected2, targetQ, self_actions, QWIN = QWInput, cost = cost)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost)
     
     init = tf.global_variables_initializer()
     
-    feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: qInput, self_actions:self_actions_input}
+    feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: qInput, self_actions: self_actions_input}
     
     #store the weights for long update
     
@@ -88,10 +91,11 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
                 prevSetWeights, prevSetBiases, prevQW = sess.run([weights_store, biases_store, QW], feed_dict = feed_dict)
             
             if(itter % Asynch == 0):
-                _ = sess.run(optimizer, feed_dict = feed_dict)
-                cost = 0
+                a = 5
+                #_ = sess.run(optimizer, feed_dict = feed_dict)
+                #cost = tf.constant(0)
             
-            if(itter % 100 == 0):
+            if(itter % 1 == 0):
                 print("Current cost of the function after itteraton " + str(itter) + " is: \t" + str(temp_cost))
                 
             costs.append(temp_cost)

@@ -7,8 +7,8 @@ Created on Thu Sep 20 15:09:16 2018
 """
 
 import numpy as np
-import ReenforcementLearning as  REL
-
+import AsynchStep as  REL
+observationWindow = 4
 
 """
 Inputs:
@@ -227,25 +227,51 @@ def intoExperience(obsLength, turns, rewards, actions):
         if(len(totalGames) < obsLength):
             totalGames.append(i)
         else:
-            finalGames.append(np.asanyarray(totalGames))
+            temp = np.asanyarray(totalGames)
+            temp = temp.T
+            finalGames.append(temp)
             del totalGames[0]
             totalGames.append(i)
-            finalRewards.append(rewards[i])
-            finalActions.append(actions[i])
+            finalRewards.append(rewards[j])
+            finalActions.append(actions[j])
     
-    finalGames.append(np.asanyarray(totalGames))
+    temp = np.asanyarray(totalGames)
+    temp = temp.T
+    finalGames.append(temp)
     finalRewards.append(rewards[rewards.shape[0] - 1])
     finalActions.append(actions[actions.shape[0] - 1])
     
     finalGames = np.asanyarray(finalGames)
     finalRewards = np.asanyarray(finalRewards)
     finalActions = np.asanyarray(finalActions)
-    
-    return finalGames
+
+    return finalGames, finalRewards, finalActions
+
 
 def intoExperienceWrapper(obsLength, turns, rewards, actions):
+    allTurns = []
+    allRewards = []
+    allActions = []
+    first = True
     for i in range(len(turns)):
-        intoExperience(obsLength, turns[i], rewards[i], actions[i])
+        a, b, c = intoExperience(obsLength, turns[i], rewards[i], actions[i])
+        if(a.shape[3] == 9):
+            if(first):
+                first = False
+                allTurns = a
+                allRewards = b
+                allActions = c
+            else:
+                allTurns = np.append(allTurns, a, 0)
+                allRewards = np.append(allRewards, b, 0)
+                allActions = np.append(allActions, c, 0)
+        
+    allTurns = np.asanyarray(allTurns)
+    allRewards = np.asanyarray(allRewards)
+    allActions = np.asanyarray(allActions)
+    
+    return allTurns, allRewards, allActions    
+    
             
 
 def experienceReplayPreprocess(turnObsLength):
@@ -288,8 +314,8 @@ def experienceReplayPreprocess(turnObsLength):
             else:
                 locX, locY, actionTaken = nextLocation(turn, 4, locX, locY)
                 
-            observationSpace = getObservations(turn, 2, locX, locY)
-            observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = 2, objectLook = 4)
+            observationSpace = getObservations(turn, observationWindow, locX, locY)
+            observationSpace = addPadding(observationSpace, objectpad=-1, observationSpace = observationWindow, objectLook = 4)
             #print(observationSpace, '\n')
             turns.append(observationSpace)
             action.append(actionTaken)
@@ -326,6 +352,11 @@ def experienceReplayPreprocess(turnObsLength):
     
     #have games with no dead turns, now need to make each of actionAll into the specific blocks
     actionAll, games, resultsList = deadTurnsWrapper(actionAll, games, resultsList)
-    intoExperienceWrapper(turnObsLength, games, resultsList, actionAll)
+    games, resultsList, actionAll = intoExperienceWrapper(turnObsLength, games, resultsList, actionAll)
+    #games = games.reshape(games.shape[0], games.shape[2], games.shape[3], games.shape[1])
+    resultsList = resultsList.reshape(resultsList.shape[0], 1)
+    actionAll = actionAll.reshape(actionAll.shape[0], 1)
+    weights, biases, actionsTaken, TrueVals, QWOut = REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
+    return weights, biases, actionsTaken, TrueVals, QWOut
     
-experienceReplayPreprocess(9)
+weights, biases, actionsTaken, TrueVals, QWOut = experienceReplayPreprocess(9)

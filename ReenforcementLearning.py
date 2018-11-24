@@ -35,11 +35,11 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
         targetQ = tf.placeholder(shape=[None],dtype=tf.float32)
         self_actions = tf.placeholder(shape=[None],dtype=tf.int32)
         
-        layer1, weightTemp, biasTemp = helper.conv_net(trainSet, XTrain.shape[3], 4, 10)
+        layer1, weightTemp, biasTemp = helper.conv_net(trainSet, XTrain.shape[3], 4, 32)
         weights_store.append(weightTemp)
         biases_store.append(biasTemp)
         
-        layer2, weightTemp, biasTemp = helper.conv_net(layer1, 10, 4, 8)
+        layer2, weightTemp, biasTemp = helper.conv_net(layer1, 32, 4, 16)
         weights_store.append(weightTemp)
         biases_store.append(biasTemp)
         
