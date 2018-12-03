@@ -7,7 +7,7 @@ Created on Thu Sep 20 15:09:16 2018
 """
 
 import numpy as np
-import ReenforcementLearning as  REL
+import AsynchStep as  REL
 import time
 observationWindow = 4
 
@@ -357,7 +357,6 @@ def experienceReplayPreprocess(turnObsLength):
     #games = games.reshape(games.shape[0], games.shape[2], games.shape[3], games.shape[1])
     resultsList = resultsList.reshape(resultsList.shape[0], 1)
     actionAll = actionAll.reshape(actionAll.shape[0], 1)
-<<<<<<< HEAD
     REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
     return None
     #weights, biases, actionsTaken, TrueVals, QWOut = REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
@@ -366,13 +365,5 @@ def experienceReplayPreprocess(turnObsLength):
 #games, resultsList, actionAll = experienceReplayPreprocess(9)
 #weights, biases, actionsTaken, TrueVals, QWOut = experienceReplayPreprocess(9)
 experienceReplayPreprocess(9)
-=======
-    weights, biases, actionsTaken, TrueVals, QWOut = REL.TrainModel(games, resultsList, actionAll, itterations = 20000)
-    
-    now = time.time() - last_time
-    print("Time passed: ", now, " seconds")
-    
-    return weights, biases, actionsTaken, TrueVals, QWOut
-    
-weights, biases, actionsTaken, TrueVals, QWOut = experienceReplayPreprocess(9)
->>>>>>> cae473ddc9ae0f39a65cbf1459ea19fd2714e542
+
+
