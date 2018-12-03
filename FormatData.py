@@ -356,7 +356,11 @@ def experienceReplayPreprocess(turnObsLength):
     #games = games.reshape(games.shape[0], games.shape[2], games.shape[3], games.shape[1])
     resultsList = resultsList.reshape(resultsList.shape[0], 1)
     actionAll = actionAll.reshape(actionAll.shape[0], 1)
-    weights, biases, actionsTaken, TrueVals, QWOut = REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
-    return weights, biases, actionsTaken, TrueVals, QWOut
-    
-weights, biases, actionsTaken, TrueVals, QWOut = experienceReplayPreprocess(9)
+    REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
+    return None
+    #weights, biases, actionsTaken, TrueVals, QWOut = REL.TrainModel(games, resultsList, actionAll, itterations = 1000)
+    return weights, biases, actionsTaken, TrueVals, QWOut, games, resultsList, actionAll
+ 
+#games, resultsList, actionAll = experienceReplayPreprocess(9)
+#weights, biases, actionsTaken, TrueVals, QWOut = experienceReplayPreprocess(9)
+experienceReplayPreprocess(9)

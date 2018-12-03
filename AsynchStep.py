@@ -76,14 +76,19 @@ def TrainModel(XTrain, rewards, actions, learning_rate = 0.0001, itterations = 2
     
     init = tf.global_variables_initializer()
     
-    feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: qInput, self_actions: self_actions_input}
-    
+    #feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: qInput, self_actions: self_actions_input}
+    totalExamples = actions.shape[0]
     #store the weights for long update
-    
     with tf.Session() as sess:
         sess.run(init)
         temp_cost = 0
         for itter in range (itterations):
+            
+            singleGame, singleAction, singleReward = AsynchHelper.singleExampleExtracter(itter, games=XTrain, actions=actions, results=rewards)
+            singleQInput = singleReward.reshape(singleReward.shape[0])
+            single_selfActions = singleAction.reshape(singleAction.shape[0])
+            
+            feed_dict={trainSet: singleGame, rewardSet: singleReward, actionSet: singleAction, targetQ: singleQInput, self_actions: single_selfActions}
             #_,temp_cost = sess.run([optimizer, cost], feed_dict=feed_dict)
             #check = sess.run([cost], feed_dict={trainSet: XTrain, rewardSet: rewards, actionSet: actions, targetQ: qInput, self_actions:self_actions_input})
             temp_cost = sess.run(cost, feed_dict = feed_dict)

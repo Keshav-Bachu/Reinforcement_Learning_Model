@@ -40,6 +40,16 @@ def expReplayHelper(finalLayer, targetQ, self_actions, h_size = 5, actions = 5, 
     Q = tf.reduce_sum(tf.multiply(Qout, actions_onehot), axis=1)
 
     td_error = tf.square(targetQ - Q)
-    loss = tf.reduce_mean(td_error) + cost
+    loss = tf.reduce_mean(td_error)# + cost
     
     return loss, predict, finalOutput, QW
+
+def singleExampleExtracter(itteration, games, actions, results):
+    examples = games.shape[0]
+    exampleNum = itteration % examples
+    
+    singleGame = games[exampleNum:exampleNum + 1]
+    singleActions = actions[exampleNum:exampleNum + 1]
+    singleResults = results[exampleNum:exampleNum + 1]
+    
+    return singleGame, singleActions, singleResults
